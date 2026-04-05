@@ -1,0 +1,28 @@
+# Never include secrets or local tooling
+.env
+.env.*
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+*.egg-info/
+
+# Test artifacts
+tests/
+pytest_cache/
+.pytest_cache/
+htmlcov/
+
+# Dev scripts and data (large files)
+scripts/
+data/
+
+# IDE
+.vscode/
+.idea/
+
+# Model weight caches (large binaries)
+*.pt
+*.pth
+*.ckpt
+*.bin
