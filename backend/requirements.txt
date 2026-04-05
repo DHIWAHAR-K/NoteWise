@@ -1,0 +1,21 @@
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-dotenv>=1.0.0
+python-multipart>=0.0.9
+# Phase 2
+assemblyai>=0.26.0
+websockets>=12.0
+# Phase 3
+langchain>=0.2.0
+langchain-openai>=0.1.0
+langchain-pinecone>=0.1.0
+pinecone-client>=3.2.0
+# Phase 4
+torch>=2.2.0
+torchvision>=0.17.0
+timm>=0.9.0
+Pillow>=10.0.0
+# Phase 5
+openai>=1.30.0
+elevenlabs>=1.2.0
+pydantic>=2.0.0

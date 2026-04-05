@@ -1,0 +1,43 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Claude (never commit)
+CLAUDE.md
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+*.egg
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.next/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+*.tar
+
+# Model weights (large binaries)
+*.pt
+*.pth
+*.ckpt
+*.bin
+
+# Logs
+*.log
