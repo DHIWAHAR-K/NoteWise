@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import transcribe, rag
+from app.routers import transcribe, rag, imaging
 
 load_dotenv()
 
@@ -20,6 +20,7 @@ app.add_middleware(
 
 app.include_router(transcribe.router)
 app.include_router(rag.router)
+app.include_router(imaging.router)
 
 
 @app.get("/health")
