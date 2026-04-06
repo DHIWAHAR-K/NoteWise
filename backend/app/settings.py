@@ -34,8 +34,9 @@ def _build_mongodb_uri() -> str | None:
     password = os.getenv("MONGO_ROOT_PASSWORD")
     if not all([host, user, password]):
         return None
+    # Database name `notewise` for application collections (e.g. conversations).
     return (
-        f"mongodb://{quote_plus(user)}:{quote_plus(password)}@{host}:{port}/"
+        f"mongodb://{quote_plus(user)}:{quote_plus(password)}@{host}:{port}/notewise"
         f"?authSource=admin"
     )
 

@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
-from app.routers import transcribe, rag, imaging, soap
+from app.routers import transcribe, rag, imaging, soap, chat
 
 load_dotenv()
 
@@ -17,13 +17,18 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    from app.settings import get_database_url
+    from app import mongo as mongo_mod
+    from app.settings import get_database_url, get_mongodb_uri
     from app.db.session import init_database, dispose_database
 
     url = get_database_url()
     if url:
         init_database(url)
+    mongo_uri = get_mongodb_uri()
+    if mongo_uri:
+        await mongo_mod.connect(mongo_uri)
     yield
+    await mongo_mod.disconnect()
     await dispose_database()
 
 
@@ -47,6 +52,7 @@ app.include_router(transcribe.router)
 app.include_router(rag.router)
 app.include_router(imaging.router)
 app.include_router(soap.router)
+app.include_router(chat.router)
 
 
 @app.get("/health")

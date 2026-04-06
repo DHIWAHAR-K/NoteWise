@@ -5,6 +5,8 @@ python-dotenv>=1.0.0
 sqlalchemy[asyncio]>=2.0.30
 asyncpg>=0.29.0
 alembic>=1.13.0
+# Mark 2 — MongoDB chat
+motor>=3.3.0
 python-multipart>=0.0.9
 # Phase 2
 assemblyai>=0.26.0
