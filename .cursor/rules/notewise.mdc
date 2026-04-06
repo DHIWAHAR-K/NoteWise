@@ -1,5 +1,5 @@
 ---
-description: NoteWise project conventions (Mark 2)
+description: NoteWise project conventions (Mark 2–3)
 alwaysApply: true
 ---
 
@@ -12,13 +12,18 @@ AI medical voice scribe **demo**. **NOT for clinical use.** Include that disclai
 - Never commit `.env`, API keys, or PHI.
 - Never stage or commit `CLAUDE.md` or `.claude/` (gitignored).
 
+## Mark 3 auth and imaging (env placeholders only in repo)
+
+- `JWT_SECRET`, `JWT_ALGORITHM` (e.g. HS256), `ACCESS_TOKEN_EXPIRE_MINUTES` — required for `/auth/*` and Bearer-protected routes (`/chat`, `/scribe`).
+- `MOONSHOT_API_KEY`, `MOONSHOT_BASE_URL` (OpenAI-compatible, e.g. `https://api.moonshot.ai/v1`), `MOONSHOT_VISION_MODEL` — for `/imaging/classify` (replaces local ViT).
+
 ## Environment
 
 - `conda activate notewise` before backend installs, `uvicorn`, tests, and Docker builds that use local Python.
 
 ## Branch
 
-- Mark 1/2 app work: `dev/testing` unless you branch explicitly.
+- Mark 1/2/3 app work: `dev/testing` unless you branch explicitly.
 
 ## Ports
 
