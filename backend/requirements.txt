@@ -16,11 +16,6 @@ langchain>=0.2.0
 langchain-openai>=0.1.0
 langchain-pinecone>=0.1.0
 pinecone-client>=3.2.0
-# Phase 4
-torch>=2.2.0
-torchvision>=0.17.0
-timm>=0.9.0
-Pillow>=10.0.0
 # Phase 5
 openai>=1.30.0
 elevenlabs>=1.2.0

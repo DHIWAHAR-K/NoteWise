@@ -1,6 +1,8 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
-from app.imaging.classifier import classify
+
+from app.imaging.moonshot_classify import classify_image_moonshot
+from app.settings import get_moonshot_api_key
 
 router = APIRouter(prefix="/imaging", tags=["imaging"])
 
@@ -16,11 +18,17 @@ class ImagingResponse(BaseModel):
 
 @router.post("/classify", response_model=ImagingResponse)
 async def classify_image(file: UploadFile = File(...)):
-    """Classify an uploaded image (chest X-ray or any image) via ViT.
+    """Classify or describe an uploaded image via Moonshot vision API.
 
     Returns label, confidence, model_id, and a clinical disclaimer.
     NOT for clinical use.
     """
+    if not get_moonshot_api_key():
+        raise HTTPException(
+            status_code=503,
+            detail="Image understanding is not configured (missing MOONSHOT_API_KEY).",
+        )
+
     if file.content_type and file.content_type not in ALLOWED_TYPES:
         raise HTTPException(
             status_code=422,
@@ -32,9 +40,11 @@ async def classify_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=422, detail="Empty file uploaded.")
 
     try:
-        result = classify(data)
+        result = await classify_image_moonshot(data, file.content_type)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Classification error: {exc}") from exc
 
