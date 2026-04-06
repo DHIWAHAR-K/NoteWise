@@ -31,3 +31,11 @@ def get_db() -> AsyncIOMotorDatabase:
 
 def is_configured() -> bool:
     return _db is not None
+
+
+async def ensure_indexes() -> None:
+    """Compound indexes for user-scoped queries (Mark 3)."""
+    if _db is None:
+        return
+    await _db.conversations.create_index([("userId", 1), ("updatedAt", -1)])
+    await _db.scribe_sessions.create_index([("userId", 1), ("createdAt", -1)])

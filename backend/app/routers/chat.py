@@ -1,4 +1,8 @@
-"""Chat history stored in MongoDB. Avoid logging request bodies or message content."""
+"""Chat history stored in MongoDB. Avoid logging request bodies or message content.
+
+Mark 3: conversations are scoped by JWT user (`userId`). Documents without `userId` (pre-Mark-3)
+are orphaned and never returned.
+"""
 
 from __future__ import annotations
 
@@ -6,10 +10,12 @@ import time
 import uuid
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from app import mongo
+from app.auth.deps import get_current_user
+from app.db.models import User
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -57,11 +63,12 @@ def _require_mongo() -> None:
 
 
 @router.get("/conversations", response_model=list[ConversationSummary])
-async def list_conversations():
+async def list_conversations(user: User = Depends(get_current_user)):
     _require_mongo()
     db = mongo.get_db()
+    uid = str(user.id)
     cursor = (
-        db.conversations.find({}, {"messages": 0})
+        db.conversations.find({"userId": uid}, {"messages": 0})
         .sort("updatedAt", -1)
         .limit(100)
     )
@@ -78,14 +85,19 @@ async def list_conversations():
 
 
 @router.post("/conversations", response_model=ConversationOut)
-async def create_conversation(body: ConversationCreate = ConversationCreate()):
+async def create_conversation(
+    user: User = Depends(get_current_user),
+    body: ConversationCreate = ConversationCreate(),
+):
     _require_mongo()
     db = mongo.get_db()
     cid = str(uuid.uuid4())
     now = int(time.time() * 1000)
     title = (body.title or "New chat").strip() or "New chat"
+    uid = str(user.id)
     doc = {
         "_id": cid,
+        "userId": uid,
         "title": title,
         "createdAt": now,
         "updatedAt": now,
@@ -102,10 +114,11 @@ async def create_conversation(body: ConversationCreate = ConversationCreate()):
 
 
 @router.get("/conversations/{conversation_id}", response_model=ConversationOut)
-async def get_conversation(conversation_id: str):
+async def get_conversation(conversation_id: str, user: User = Depends(get_current_user)):
     _require_mongo()
     db = mongo.get_db()
-    doc = await db.conversations.find_one({"_id": conversation_id})
+    uid = str(user.id)
+    doc = await db.conversations.find_one({"_id": conversation_id, "userId": uid})
     if not doc:
         raise HTTPException(status_code=404, detail="Conversation not found")
     messages = [
@@ -130,9 +143,14 @@ async def get_conversation(conversation_id: str):
     "/conversations/{conversation_id}/messages",
     response_model=ConversationOut,
 )
-async def append_message(conversation_id: str, body: ChatMessageIn):
+async def append_message(
+    conversation_id: str,
+    body: ChatMessageIn,
+    user: User = Depends(get_current_user),
+):
     _require_mongo()
     db = mongo.get_db()
+    uid = str(user.id)
     now = body.timestamp if body.timestamp is not None else int(time.time() * 1000)
     msg_id = body.id or str(uuid.uuid4())
     msg = {
@@ -144,7 +162,7 @@ async def append_message(conversation_id: str, body: ChatMessageIn):
 
     count_result = await db.conversations.aggregate(
         [
-            {"$match": {"_id": conversation_id}},
+            {"$match": {"_id": conversation_id, "userId": uid}},
             {"$project": {"n": {"$size": {"$ifNull": ["$messages", []]}}}},
         ]
     ).to_list(1)
@@ -154,7 +172,7 @@ async def append_message(conversation_id: str, body: ChatMessageIn):
         raise HTTPException(status_code=400, detail="Conversation message limit reached")
 
     result = await db.conversations.update_one(
-        {"_id": conversation_id},
+        {"_id": conversation_id, "userId": uid},
         {
             "$push": {"messages": msg},
             "$set": {"updatedAt": now},
@@ -167,10 +185,11 @@ async def append_message(conversation_id: str, body: ChatMessageIn):
 
 
 @router.delete("/conversations/{conversation_id}")
-async def delete_conversation(conversation_id: str):
+async def delete_conversation(conversation_id: str, user: User = Depends(get_current_user)):
     _require_mongo()
     db = mongo.get_db()
-    result = await db.conversations.delete_one({"_id": conversation_id})
+    uid = str(user.id)
+    result = await db.conversations.delete_one({"_id": conversation_id, "userId": uid})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return {"ok": True}
