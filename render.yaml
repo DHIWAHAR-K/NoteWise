@@ -46,6 +46,8 @@ services:
     region: oregon
     dockerfilePath: backend/Dockerfile
     dockerContext: backend
+    # Runs in the built image before the new release receives traffic (DATABASE_URL / POSTGRES_* must be set).
+    preDeployCommand: python -m alembic upgrade head
     envVars:
       - key: PORT
         value: "8000"

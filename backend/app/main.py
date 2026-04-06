@@ -77,3 +77,19 @@ async def health_db():
     except Exception:
         logger.error("database health check failed")
         return JSONResponse(status_code=503, content={"database": "error"})
+
+
+@app.get("/health/mongo")
+async def health_mongo():
+    from app import mongo as mongo_mod
+    from app.settings import get_mongodb_uri
+
+    if not get_mongodb_uri() or not mongo_mod.is_configured():
+        return {"mongo": "not_configured"}
+    try:
+        db = mongo_mod.get_db()
+        await db.command("ping")
+        return {"mongo": "ok"}
+    except Exception:
+        logger.error("mongo health check failed")
+        return JSONResponse(status_code=503, content={"mongo": "error"})
