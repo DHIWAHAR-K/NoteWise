@@ -25,3 +25,7 @@ Pillow>=10.0.0
 openai>=1.30.0
 elevenlabs>=1.2.0
 pydantic>=2.0.0
+email-validator>=2.1.0
+# Mark 3 — auth
+bcrypt>=4.1.0
+PyJWT>=2.8.0

@@ -51,6 +51,43 @@ def get_mongodb_uri() -> str | None:
     return _build_mongodb_uri()
 
 
+def get_jwt_secret() -> str | None:
+    s = os.getenv("JWT_SECRET", "").strip()
+    return s or None
+
+
+def get_jwt_algorithm() -> str:
+    return os.getenv("JWT_ALGORITHM", "HS256").strip() or "HS256"
+
+
+def get_access_token_expire_minutes() -> int:
+    raw = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "10080").strip()
+    try:
+        n = int(raw)
+        return max(5, min(n, 60 * 24 * 30))
+    except ValueError:
+        return 10080
+
+
+def get_moonshot_api_key() -> str | None:
+    s = os.getenv("MOONSHOT_API_KEY", "").strip()
+    return s or None
+
+
+def get_moonshot_base_url() -> str:
+    return (
+        os.getenv("MOONSHOT_BASE_URL", "https://api.moonshot.ai/v1").strip()
+        or "https://api.moonshot.ai/v1"
+    ).rstrip("/")
+
+
+def get_moonshot_vision_model() -> str:
+    return (
+        os.getenv("MOONSHOT_VISION_MODEL", "moonshot-v1-8k-vision-preview").strip()
+        or "moonshot-v1-8k-vision-preview"
+    )
+
+
 def clear_settings_cache() -> None:
     get_database_url.cache_clear()
     get_mongodb_uri.cache_clear()

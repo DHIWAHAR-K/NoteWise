@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
-from app.routers import transcribe, rag, imaging, soap, chat
+from app.routers import transcribe, rag, imaging, soap, chat, auth
 
 load_dotenv()
 
@@ -48,6 +48,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(transcribe.router)
 app.include_router(rag.router)
 app.include_router(imaging.router)
