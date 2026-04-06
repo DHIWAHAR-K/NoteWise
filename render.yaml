@@ -1,0 +1,97 @@
+# Render Blueprint: FastAPI (Docker) + PostgreSQL + MongoDB as Private Services with disks.
+# Private services are not on the free instance type; use Starter or higher for DB pservs.
+# Set POSTGRES_PASSWORD, MONGO_ROOT_PASSWORD, CORS_ORIGINS, and API keys in the Render Dashboard (sync: false).
+
+services:
+  - type: pserv
+    name: notewise-postgres
+    runtime: image
+    plan: starter
+    region: oregon
+    image:
+      url: docker.io/library/postgres:16
+    envVars:
+      - key: POSTGRES_USER
+        value: notewise
+      - key: POSTGRES_DB
+        value: notewise
+      - key: POSTGRES_PASSWORD
+        sync: false
+    disk:
+      name: pgdata
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 10
+
+  - type: pserv
+    name: notewise-mongo
+    runtime: image
+    plan: starter
+    region: oregon
+    image:
+      url: docker.io/library/mongo:7.0
+    envVars:
+      - key: MONGO_INITDB_ROOT_USERNAME
+        value: notewise
+      - key: MONGO_INITDB_ROOT_PASSWORD
+        sync: false
+    disk:
+      name: mongodata
+      mountPath: /data/db
+      sizeGB: 10
+
+  - type: web
+    name: notewise-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: POSTGRES_HOST
+        fromService:
+          name: notewise-postgres
+          type: pserv
+          property: host
+      - key: POSTGRES_PORT
+        fromService:
+          name: notewise-postgres
+          type: pserv
+          property: port
+      - key: POSTGRES_USER
+        value: notewise
+      - key: POSTGRES_DB
+        value: notewise
+      - key: POSTGRES_PASSWORD
+        sync: false
+      - key: MONGODB_HOST
+        fromService:
+          name: notewise-mongo
+          type: pserv
+          property: host
+      - key: MONGODB_PORT
+        fromService:
+          name: notewise-mongo
+          type: pserv
+          property: port
+      - key: MONGO_ROOT_USER
+        value: notewise
+      - key: MONGO_ROOT_PASSWORD
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: ASSEMBLYAI_API_KEY
+        sync: false
+      - key: PINECONE_API_KEY
+        sync: false
+      - key: PINECONE_INDEX_NAME
+        value: notewise-kb
+      - key: PINECONE_ENVIRONMENT
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_VOICE_ID
+        sync: false
