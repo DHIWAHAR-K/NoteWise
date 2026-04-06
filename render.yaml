@@ -1,6 +1,8 @@
 # Render Blueprint: FastAPI (Docker) + PostgreSQL + MongoDB as Private Services with disks.
 # Private services are not on the free instance type; use Starter or higher for DB pservs.
-# Set POSTGRES_PASSWORD, MONGO_ROOT_PASSWORD, CORS_ORIGINS, and API keys in the Render Dashboard (sync: false).
+# Set POSTGRES_PASSWORD, MONGO_ROOT_PASSWORD, CORS_ORIGINS, API keys, JWT_SECRET, and MOONSHOT_* in the Dashboard (sync: false).
+# Mark 3 smoke (after deploy): GET /health, /health/db, /health/mongo → POST /auth/register → POST /auth/login →
+# GET /auth/me (Bearer) → GET /chat/conversations → POST /scribe/sessions → POST /imaging/classify (with MOONSHOT_API_KEY).
 
 services:
   - type: pserv
@@ -93,6 +95,18 @@ services:
         sync: false
       - key: OPENAI_API_KEY
         sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "10080"
+      - key: MOONSHOT_API_KEY
+        sync: false
+      - key: MOONSHOT_BASE_URL
+        value: https://api.moonshot.ai/v1
+      - key: MOONSHOT_VISION_MODEL
+        value: moonshot-v1-8k-vision-preview
       - key: ELEVENLABS_API_KEY
         sync: false
       - key: ELEVENLABS_VOICE_ID
