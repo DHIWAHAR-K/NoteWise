@@ -1,0 +1,31 @@
+---
+description: NoteWise project conventions (Mark 2)
+alwaysApply: true
+---
+
+# NoteWise
+
+AI medical voice scribe **demo**. **NOT for clinical use.** Include that disclaimer in user-visible API copy you add.
+
+## Secrets and local-only paths
+
+- Never commit `.env`, API keys, or PHI.
+- Never stage or commit `CLAUDE.md` or `.claude/` (gitignored).
+
+## Environment
+
+- `conda activate notewise` before backend installs, `uvicorn`, tests, and Docker builds that use local Python.
+
+## Branch
+
+- Mark 1/2 app work: `dev/testing` unless you branch explicitly.
+
+## Ports
+
+- Backend: `http://127.0.0.1:8000`
+- Frontend (Vite): `http://localhost:5173`
+- Vite proxy: `/api` → backend (when configured).
+
+## Logs
+
+- No PHI in logs, analytics, or committed files.
